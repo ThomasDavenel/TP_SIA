@@ -77,11 +77,11 @@ namespace Application
 			m_root.addSon( insecte->getInsecte());
 			//interpolation version2
 			
-			l_position->push_back(Math::makeVector(-8.0f, 0.0f, 0.0f) );
-			l_position->push_back(Math::makeVector(0.0f, 8.0f, 0.0f));
-			l_position->push_back(Math::makeVector(8.0f, 0.0f, 0.0f));
-			l_position->push_back(Math::makeVector(0.0f, -8.0f, 0.0f));
-			l_position->push_back(Math::makeVector(-8.0f, 0.0f, 0.0f));
+			l_position->push_back(Math::makeVector(-3.0f, 3.0f, 3.0f) );
+			l_position->push_back(Math::makeVector(3.0f, 3.0f, 6.0f));
+			l_position->push_back(Math::makeVector(3.0f, -3.0f, 9.0f));
+			l_position->push_back(Math::makeVector(-3.0f, -3.0f, 12.0f));
+			l_position->push_back(Math::makeVector(-3.0f, 3.0f, 3.0f));
 
 			l_vitesse->push_back(Math::makeVector(0.0f, 1.0f, 0.0f));
 			l_vitesse->push_back(Math::makeVector(0.0f, 0.0f, 1.0f));
@@ -107,8 +107,9 @@ namespace Application
 			//std::cout << "pos : " << pos[0] << " - " << pos[1] << " - " << pos[2] << std::endl;
 			Math::Vector3f v_vitesse = m_interpolationV2.vitesse(tmp);
 			sphericalCoord->set(v_vitesse);
-			insecte->Rota_Y(sphericalCoord->getTheta());
-			insecte->Rota_Z(sphericalCoord->getPhy());
+			insecte->Rota_X(0);
+			insecte->Rota_Y(sphericalCoord->getPhy());
+			insecte->Rota_Z(sphericalCoord->getTheta());
 			insecte->mouvement(pos);
 			//animation aile
 			insecte->animationAile(dt);

@@ -266,6 +266,7 @@
     <ClInclude Include="..\src\Application\KeyboardStatus.h" />
     <ClInclude Include="..\src\Application\Menu.h" />
     <ClInclude Include="..\src\Application\TP1_siaa.h" />
+    <ClInclude Include="..\src\Application\TP2_siaa.h" />
     <ClInclude Include="..\src\Config.h" />
     <ClInclude Include="..\src\gl3\AttribPointerProxy.h" />
     <ClInclude Include="..\src\gl3\Camera.h" />
