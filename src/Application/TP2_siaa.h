@@ -50,35 +50,53 @@ namespace Application
 		//Fonction pour ajouter une chaine polyarticulée au graphe de scène
 		void addChaineArt(unsigned int nb_Seg) {
 			//cylindre
+			float hauteur_cylindre = 1;
 			HelperGl::Material mat_cylindre = HelperGl::Material();
 			mat_cylindre.setDiffuse(HelperGl::Color(1.f, 1.f, 1.f));
 			mat_cylindre.setSpecular(HelperGl::Color(1.f, 1.f, 1.f));
-			SceneGraph::Cylinder* cylindre = new SceneGraph::Cylinder(mat_cylindre,0.1, 0.1, 0.5);
+			SceneGraph::Cylinder* cylindre = new SceneGraph::Cylinder(mat_cylindre,0.1, 0.1, hauteur_cylindre);
 			//sphère
+			float rayon_sphere = 0.2;
 			HelperGl::Material mat_sphere = HelperGl::Material();
 			mat_sphere.setDiffuse(HelperGl::Color(0.f, 1.f, 0.f));
 			mat_sphere.setSpecular(HelperGl::Color(0.f, 1.f, 0.f));
-			SceneGraph::Sphere* sphere =new  SceneGraph::Sphere(mat_sphere, 0.2);
+			SceneGraph::Sphere* sphere =new  SceneGraph::Sphere(mat_sphere, rayon_sphere);
 			if (nb_Seg > 0) {
 				m_root.addSon(cylindre);
 			}
-			SceneGraph::Translate* translation = new SceneGraph::Translate(Math::makeVector(0.f, 0.f, 0.5f));
-			Animation::KinematicChain::Node * chaintmp = ma_chaine->addStaticTranslation(ma_chaine->getRoot(), Math::makeVector(0.f, 0.f, 0.5f));
+			//Scene de graphe
+			SceneGraph::Translate* translation = new SceneGraph::Translate(Math::makeVector(0.f, 0.f, hauteur_cylindre));
 			m_root.addSon(translation);
+			//chaine poly
+			Animation::KinematicChain::Node * chaintmp = ma_chaine->addStaticTranslation(ma_chaine->getRoot(), Math::makeVector(0.f, 0.f, hauteur_cylindre));
+			/*~~~~~~~~*/
 			SceneGraph::Group * nodetmp= translation;
 			Math::Interval<float> interval = Math::makeInterval<float>(-Math::pi/2,Math::pi/2);
 			for (int i = 1; i < nb_Seg; i++) {
 				nodetmp->addSon(sphere);
-				SceneGraph::Rotate * rotate_x = new SceneGraph::Rotate(0, Math::makeVector(1, 0, 0));
 				//Scene de graphe
+				SceneGraph::Rotate * rotate_x = new SceneGraph::Rotate(0, Math::makeVector(1, 0, 0));
 				nodetmp->addSon(rotate_x);
 				//chaine poly
 				Animation::KinematicChain::Node * rotate_xPoly = ma_chaine->addDynamicRotation(chaintmp, Math::makeVector(1, 0, 0),interval,0);
+				//vecteur de correspondance
+				v_correspondance->push_back(std::pair<SceneGraph::Group, Animation::KinematicChain::Node>(*rotate_x, rotate_xPoly));
+				/*~~~~~~~~*/
+				//Scene de graphe
 				SceneGraph::Rotate * rotate_z = new SceneGraph::Rotate(0, Math::makeVector(0, 0, 1));
 				rotate_x->addSon(rotate_z);
+				//chaine poly
+				Animation::KinematicChain::Node * rotate_zPoly = ma_chaine->addDynamicRotation(rotate_xPoly, Math::makeVector(0, 0, 1), interval, 0);
+				//vecteur de correspondance
+				v_correspondance->push_back(std::pair<SceneGraph::Group, Animation::KinematicChain::Node>(*rotate_z, rotate_zPoly));
+				/*~~~~~~~~*/
 				rotate_z->addSon(cylindre);
-				SceneGraph::Translate* new_Translation = new SceneGraph::Translate(Math::makeVector(0.f, 0.f, 0.5f));
+				//Scene de graphe
+				SceneGraph::Translate* new_Translation = new SceneGraph::Translate(Math::makeVector(0.f, 0.f, hauteur_cylindre));
 				rotate_z->addSon(new_Translation);
+				//chaine poly
+				chaintmp = ma_chaine->addStaticTranslation(rotate_zPoly, Math::makeVector(0.f, 0.f, hauteur_cylindre));
+				/*~~~~~~~~*/
 				nodetmp = new_Translation;
 			}
 		}
@@ -92,7 +110,7 @@ namespace Application
 		virtual void initializeRendering()
 		{
 			//init TP2
-			addChaineArt(3);
+			addChaineArt(5);
 			//camera
 			m_camera.setPosition(Math::makeVector(0.f, 0.f, 10.f));
 			// Light
