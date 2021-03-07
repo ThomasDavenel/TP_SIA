@@ -518,6 +518,9 @@
     <ClInclude Include="..\src\Application\TP2_siaa.h">
       <Filter>src\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Sia\CCD.h">
+      <Filter>src\Sia</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\data\Shaders\Example\nothing.vert">

@@ -91,12 +91,12 @@
 			insecte->setTranslation(v);
 		}
 		void Rota_X(float angle) {
-			rot_x->setAngle(angle + Math::pi);
+			rot_x->setAngle(angle /*+ Math::pi*/);
 		}
 		void Rota_Y(float angle) {
-			rot_y->setAngle(angle + (Math::pi / 2));
+			rot_y->setAngle(angle - (Math::pi / 2));
 		}
 		void Rota_Z(float angle) {
-			rot_z->setAngle(angle + Math::pi );
+			rot_z->setAngle(angle /*+ Math::pi*/ );
 		}
 	};

@@ -348,6 +348,7 @@
     <ClInclude Include="..\src\SceneGraph\Sphere.h" />
     <ClInclude Include="..\src\SceneGraph\Transform.h" />
     <ClInclude Include="..\src\SceneGraph\Translate.h" />
+    <ClInclude Include="..\src\Sia\CCD.h" />
     <ClInclude Include="..\src\Sia\Insecte.h" />
     <ClInclude Include="..\src\Sia\Interpol_Traj.h" />
     <ClInclude Include="..\src\Sia\Interpol_Traj_v2.h" />
