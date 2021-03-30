@@ -23,7 +23,7 @@ public:
 		convergetoward(decalage, variationAngulaireMax);
 		float distance = sqrt(pow(decalage[0],2) + pow(decalage[1],2) + pow(decalage[1],2));
 		//std::cout << distance << std::endl;
-		return (distance < 0.5);
+		return (distance < 0.15);
 	}
 private:
 	void private_converge(Math::Vector3f decalage,Animation::KinematicChain::DegreeOfFreedom dof, float VariationAngulaireMax) {

@@ -17,6 +17,11 @@ namespace Application
 {
 	class TP2_siaa : public BaseWithKeyboard
 	{
+	/*README*/
+		//Sphere jaune: point de départ du bras articulé.
+		//Sphere Rouge: point d'arrivé du bras articulé.
+		//Sphère orange: point ciblé intermédiaire.
+		//Cylidre gris: socle du bras articulé.
 	protected:
 		HelperGl::Camera m_camera;
 
@@ -137,6 +142,8 @@ namespace Application
 			}
 			return chaintmp;
 		}
+
+		//Cette Méthode permet de rafraichier le graphe de scene grace au DOF
 		void RefreshGraph() {
 			for (auto pair = v_correspondance->begin(); pair < v_correspondance->end();pair++) {
 				//std::cout << pair->second->operator float() << std::endl;
@@ -152,7 +159,7 @@ namespace Application
 		virtual void initializeRendering()
 		{
 			//init TP2
-			nb_os = 8;
+			nb_os = 10;
 			extremiteNoeud =addChaineArt(nb_os);
 			/*cible*/
 			float rayon_sphere = 0.2;
@@ -167,10 +174,12 @@ namespace Application
 			std::cout << y_rng << std::endl;
 			std::cout << z_rng << std::endl;
 			*/
-			cible =new SceneGraph::Translate(Math::makeVector(x_rng, y_rng, z_rng));
+			cible = new SceneGraph::Translate(Math::makeVector(x_rng, y_rng, z_rng));
 			cible->addSon(new SceneGraph::Sphere(mat_sphere, rayon_sphere));
-			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0,0,0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
+			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
 			cible_Intermediaire = new SceneGraph::Translate(m_interpolation.SplineHermite(tmp));
+			pt_Depart->setTranslation(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0));
+			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0,0,0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
 			mat_sphere.setDiffuse(HelperGl::Color(1.f, 0.4f, 0.f));
 			mat_sphere.setSpecular(HelperGl::Color(1.f, 0.4f, 0.f));
 			cible_Intermediaire->addSon(new SceneGraph::Sphere(mat_sphere, rayon_sphere/2));
@@ -192,14 +201,24 @@ namespace Application
 			light->enable();
 			HelperGl::LightServer::Light * light2 = HelperGl::LightServer::getSingleton()->createLight(lightPosition.popBack(), lightColor, lightColor, lightColor);
 			light2->enable();
+			//Créer une nouvelle cible (Debug sinon il falllait appuyer su 'n')
+			x_rng = pow(-1, (rand() % 100))*((float)(rand() % 100) / 100)*(nb_os / 2);
+			y_rng = pow(-1, (rand() % 100))*((float)(rand() % 100) / 100)*(nb_os / 2);
+			z_rng = ((float)(rand() % 100) / 100)*(nb_os / 2);
+			cible->setTranslation(Math::makeVector(x_rng, y_rng, z_rng));
+			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
+			tmp = 0;
+			cible_Intermediaire->setTranslation(m_interpolation.SplineHermite(tmp));
+			pt_Depart->setTranslation(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0));
 		}
+
 
 		virtual void render(double dt)
 		{
 			/*convergence*/
 			Math::Vector3f extremity = extremiteNoeud->getGlobalTransformation()*Math::makeVector(0.0f, 0.0f, 0.0f);
 			Math::Vector3f deltaTarget = cible_Intermediaire->getTranslation() - extremity;
-			if (m_CDD->solve(deltaTarget, 0.01f)) {
+			if (m_CDD->solve(deltaTarget, 0.001f)) {
 				tmp = tmp + dt;
 				cible_Intermediaire->setTranslation(m_interpolation.SplineHermite(tmp));
 			}

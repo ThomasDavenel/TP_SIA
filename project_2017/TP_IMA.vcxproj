@@ -47,7 +47,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
@@ -267,6 +267,7 @@
     <ClInclude Include="..\src\Application\Menu.h" />
     <ClInclude Include="..\src\Application\TP1_siaa.h" />
     <ClInclude Include="..\src\Application\TP2_siaa.h" />
+    <ClInclude Include="..\src\Application\TP3_siaa.h" />
     <ClInclude Include="..\src\Config.h" />
     <ClInclude Include="..\src\gl3\AttribPointerProxy.h" />
     <ClInclude Include="..\src\gl3\Camera.h" />

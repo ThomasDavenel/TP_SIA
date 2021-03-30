@@ -5,6 +5,7 @@
 #include <Application/GL3_TP3.h>
 #include <Application/TP1_siaa.h>
 #include <Application/TP2_siaa.h>
+#include <Application/TP3_siaa.h>
 
 int main(int argc, char ** argv)
 {
@@ -19,6 +20,7 @@ int main(int argc, char ** argv)
 	/*SIA*/
 	Application::ApplicationSelection::registerFactory<Application::TP1_siaa>("SIA - TP 1");
 	Application::ApplicationSelection::registerFactory<Application::TP2_siaa>("SIA - TP 2");
+	Application::ApplicationSelection::registerFactory<Application::TP3_siaa>("SIA - TP 3");
 
 	// Initializes GLUT and GLEW
 	Application::Base::initializeGLUT(argc, argv) ;
