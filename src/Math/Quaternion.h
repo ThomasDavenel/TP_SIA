@@ -383,7 +383,7 @@ namespace Math
 		/// <param name="v1">The second quaternion.</param>
 		/// <param name="t">The interpolation value in interval [0;1].</param>
 		/// <returns></returns>
-		static Quaternion slerp(Quaternion v0, Quaternion v1, double t) {
+		static Quaternion slerp(Quaternion v0, Quaternion v1, Float t) {
 			// Only unit quaternions are valid rotations. Normalize to avoid undefined behavior.
 			v0.normalize();
 			v1.normalize();
@@ -398,7 +398,7 @@ namespace Math
 				dot = -dot;
 			}
 
-			const Float DOT_THRESHOLD = 0.9995;
+			const Float DOT_THRESHOLD = Float(0.9995);
 			if (dot > DOT_THRESHOLD) {
 				// If the inputs are too close for comfort, linearly interpolate and normalize the result.
 				Quaternion result = v0 + (v1 - v0) * t;
@@ -406,15 +406,35 @@ namespace Math
 				return result;
 			}
 			// Since dot is in range [0, DOT_THRESHOLD], acos is safe
-			Float theta_0 = acos(dot);        // theta_0 = angle between input vectors
-			Float theta = theta_0 * t;          // theta = angle between v0 and result
-			Float sin_theta = sin(theta);     // compute this value only once
-			Float sin_theta_0 = sin(theta_0); // compute this value only once
+			Float theta_0 = Float(acos(dot));        // theta_0 = angle between input vectors
+			Float theta = Float(theta_0 * t);          // theta = angle between v0 and result
+			Float sin_theta = Float(sin(theta));     // compute this value only once
+			Float sin_theta_0 = Float(sin(theta_0)); // compute this value only once
 
-			Float s0 = cos(theta) - dot * sin_theta / sin_theta_0;  // == sin(theta_0 - theta) / sin(theta_0)
-			Float s1 = sin_theta / sin_theta_0;
+			Float s0 = Float(cos(theta) - dot * sin_theta / sin_theta_0);  // == sin(theta_0 - theta) / sin(theta_0)
+			Float s1 = Float(sin_theta / sin_theta_0);
 
 			return (v0*s0) + (v1*s1);
+		}
+
+		/// <summary>
+		/// Computes the dot product between two quaternions.
+		/// </summary>
+		/// <param name="other">The other quaternion.</param>
+		/// <returns></returns> 
+		Float dot(const Quaternion & other) const
+		{
+			return m_v * other.m_v + m_s * other.m_s;
+		}
+
+		/// <summary>
+		/// Equality comparison.
+		/// </summary>
+		/// <param name="other">The other.</param>
+		/// <returns></returns>
+		bool operator== (const Quaternion & other) const
+		{
+			return m_v == other.m_v && m_s == other.m_s;
 		}
 	};
 } 

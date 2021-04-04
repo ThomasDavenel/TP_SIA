@@ -47,6 +47,16 @@ namespace MotionPlanning
 			Math::Quaternion<float> m_orientation;
 
 			/// <summary>
+			/// Equality comparison.
+			/// </summary>
+			/// <param name="other">The other.</param>
+			/// <returns></returns>
+			bool operator==(const Configuration & other) const
+			{
+				return m_translation == other.m_translation && m_orientation == other.m_orientation;
+			}
+
+			/// <summary>
 			/// Initializes a new instance of the <see cref="Configuration"/> struct.
 			/// </summary>
 			Configuration()
@@ -88,7 +98,7 @@ namespace MotionPlanning
 		/// <returns></returns>
 		static std::pair<float, float> defaultAngleInterval()
 		{
-			return std::make_pair(-Math::pi, Math::pi);
+			return std::make_pair(-float(Math::pi), float(Math::pi));
 		}
 
 		/// <summary>
@@ -105,6 +115,8 @@ namespace MotionPlanning
 		/// A uniform random generator
 		/// </summary>
 		Math::UniformRandom m_uniformRandom;
+
+	private:
 		/// <summary>
 		/// The search intervals (x, y, z, angle X, angle Y, angle Z)
 		/// </summary>
@@ -116,11 +128,7 @@ namespace MotionPlanning
 		/// <summary>
 		/// The mobile
 		/// </summary>
-		MotionPlanning::CollisionManager::DynamicCollisionObject m_object;
-		/// <summary>
-		/// The maximum distance between the origin and the vertices of the mobile geometry
-		/// </summary>
-		float m_maxDistance;
+		mutable MotionPlanning::CollisionManager::DynamicCollisionObject m_object;
 
 	public:
 		/// <summary>
@@ -130,13 +138,8 @@ namespace MotionPlanning
 		/// <param name="object">The mobile.</param>
 		/// <param name="maxDistance">The maximum distance between two samples along an interpolation path.</param>
 		/// <param name="intervals">The search intervals (x, y, z, angle X, angle Y, angle Z).</param>
-		SixDofPlannerBase(MotionPlanning::CollisionManager * collisionManager, MotionPlanning::CollisionManager::DynamicCollisionObject object, float maxDistance,
-			const std::initializer_list<std::pair<float, float>> & intervals = { defaultPositionInterval(), defaultPositionInterval(), defaultPositionInterval(), defaultAngleInterval(), defaultAngleInterval(),defaultAngleInterval() }
-			)
-			: m_intervals(intervals), m_collisionManager(collisionManager), m_object(object), m_maxDistance(maxDistance)
-		{
-			assert(m_intervals.size() == 6);
-		}
+		SixDofPlannerBase(MotionPlanning::CollisionManager* collisionManager, MotionPlanning::CollisionManager::DynamicCollisionObject object, const std::initializer_list<std::pair<float, float>>& intervals = 
+			{ defaultPositionInterval(), defaultPositionInterval(), defaultPositionInterval(), defaultAngleInterval(), defaultAngleInterval(), defaultAngleInterval() });
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SixDofPlannerBase"/> class.
@@ -145,50 +148,27 @@ namespace MotionPlanning
 		/// <param name="object">The mobile.</param>
 		/// <param name="maxDistance">The maximum distance between two samples along an interpolation path.</param>
 		/// <param name="intervals">The search intervals (x, y, z, angle X, angle Y, angle Z).</param>
-		SixDofPlannerBase(MotionPlanning::CollisionManager * collisionManager, MotionPlanning::CollisionManager::DynamicCollisionObject object, float maxDistance, const std::vector<std::pair<float, float>> & intervals)
-			: m_intervals(intervals), m_collisionManager(collisionManager), m_object(object), m_maxDistance(maxDistance)
-		{
-			assert(m_intervals.size() == 6);
-		}
+		SixDofPlannerBase(MotionPlanning::CollisionManager* collisionManager, MotionPlanning::CollisionManager::DynamicCollisionObject object, const std::vector<std::pair<float, float>>& intervals);
 
 		/// <summary>
 		/// Generates a random configuration.
 		/// </summary>
 		/// <returns></returns>
-		Configuration randomConfiguration();
+		Configuration randomConfiguration() const;
 
 		/// <summary>
 		/// Computes the minimum distance between the mobile and the obstacles.
 		/// </summary>
 		/// <param name="configuration">The configuration.</param>
 		/// <returns></returns>
-		float distanceToObstacles(const Configuration & configuration);
+		float distanceToObstacles(const Configuration & configuration) const;
 
 		/// <summary>
 		/// Tests if this configuration is in collision with the environment
 		/// </summary>
 		/// <param name="configuration">The configuration.</param>
 		/// <returns></returns>
-		bool doCollide(const Configuration & configuration);
-
-		/// <summary>
-		/// Distance between two configurations
-		/// </summary>
-		/// <param name="c1">The c1.</param>
-		/// <param name="c2">The c2.</param>
-		/// <returns></returns>
-		float configurationDistance(const Configuration & c1, const Configuration & c2) const;
-
-		/// <summary>
-		/// Recursively tests if the interpolation between two configurations collides with the environment.
-		/// </summary>
-		/// <param name="startPosition">The start position.</param>
-		/// <param name="startQ">The start orientation.</param>
-		/// <param name="endPosition">The end position.</param>
-		/// <param name="endQ">The end orientation.</param>
-		/// <param name="dq">The maximum distance between two samples along the path.</param>
-		/// <returns></returns>
-		bool doCollideRecursive(const Math::Vector3f & startPosition, const Math::Quaternion<float> & startQ, const Math::Vector3f & endPosition, const Math::Quaternion<float> & endQ, float dq);
+		bool doCollide(const Configuration & configuration) const;
 
 		/// <summary>
 		/// Tests if the interpolation between two configurations collides with the environment.
@@ -197,13 +177,33 @@ namespace MotionPlanning
 		/// <param name="end">The target configuration.</param>
 		/// <param name="dq">The maximum distance between two samples along the path.</param>
 		/// <returns></returns>
-		bool doCollide(const Configuration & start, const Configuration & end, float dq);
+		bool doCollide(const Configuration & start, const Configuration & end, float dq) const;
 
 		/// <summary>
 		/// Optimizes the specified path.
 		/// </summary>
 		/// <param name="toOptimize">The path to optimize.</param>
 		/// <param name="dq">The maximum distance between to samples along the path.</param>
-		void optimize(::std::vector<Configuration> & toOptimize, float dq);
+		void optimize(::std::vector<Configuration> & toOptimize, float dq) const;
+
+		/// <summary>
+		/// Distance between two configurations
+		/// </summary>
+		/// <param name="c1">The c1.</param>
+		/// <param name="c2">The c2.</param>
+		/// <returns></returns>
+		static float configurationDistance(const Configuration & c1, const Configuration & c2);
+
+		/// <summary>
+		/// Finds a configuration between source and target such as the distance between the source and the configuration is as close as possible to maxDistance and never greater than the distance between source and target.
+		/// </summary>
+		/// <param name="source">The source.</param>
+		/// <param name="target">The target.</param>
+		/// <param name="maxDistance">The maximum distance.</param>
+		/// <param name="iterationLimit">The iteration limit when approximating the best solution.</param>
+		/// <returns></returns>
+		static Configuration limitDistance(const Configuration& source, const Configuration& target, float maxDistance, size_t iterationLimit = 32);
+		
+		virtual bool plan(const Configuration & start, const Configuration & target, float radius, float dq, std::vector<Configuration> & result) = 0;
 	};
 }

@@ -3,7 +3,10 @@
 #include <MotionPlanning/converter.h>
 #include <unordered_map>
 #include <unordered_set>
+#pragma warning(push, 0)        
 #include <fcl/fcl.h>
+#pragma warning(pop)
+
 
 namespace MotionPlanning
 {
@@ -22,7 +25,7 @@ namespace MotionPlanning
 		class CollisionObject
 		{
 			friend class CollisionManager;
-			friend class HashFunction;
+			friend struct HashFunction;
 
 		protected:
 			::std::shared_ptr<fcl::CollisionObject<float>> m_object;
@@ -206,7 +209,7 @@ namespace MotionPlanning
 
 		
 		/// <summary>
-		/// Tests if dynamic objects collide together of with static objects.
+		/// Tests if dynamic objects collide together or with static objects.
 		/// </summary>
 		/// <returns></returns>
 		bool doCollide() ;
@@ -217,7 +220,5 @@ namespace MotionPlanning
 		/// <returns></returns>
 		float computeDistance() ;
 
-		std::pair<float, Math::Vector3f> computeDistanceAndTranslation() const
-		{}
 	};
 }

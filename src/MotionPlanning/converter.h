@@ -32,6 +32,7 @@ namespace MotionPlanning
 	inline ::std::pair<fcl::Quaternionf, fcl::Vector3f> convert(const Math::Matrix4x4f & m)
 	{
 		fcl::Vector3f translation = convert(m.getColumn(3).popBack());
+#pragma warning (suppress:4244)
 		float qw = sqrt(1 + m(0,0) + m(1,1) + m(2,2)) / 2.0;
 		float qx = (m(2, 1) - m(1, 2)) / (4 * qw); 
 		float qy = (m(0, 2) - m(2, 0)) / (4 * qw); 

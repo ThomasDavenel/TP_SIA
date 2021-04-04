@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <limits>
 #include <cassert>
+#include <stdext/kmap.h>
 
 static size_t s_vpTreeDistanceCount = 0;
 
@@ -10,14 +11,14 @@ namespace MotionPlanning
 	/// <summary>
 	/// Vantage point tree for nearest neighbor queries
 	/// </summary>
-	template <typename Data, typename SearchData>
+	template <typename Data, typename SearchData=Data>
 	class VPTree
 	{
 		/// <summary>
 		/// The buckets size (maximum number of elements in the leaves).
 		/// </summary>
 		/// <returns></returns>
-		static constexpr size_t bucketSize() { return 16; }
+		static constexpr size_t bucketSize() { return 8; } // 16
 
 		/// <summary>
 		/// A node of vantage point tree
@@ -106,9 +107,11 @@ namespace MotionPlanning
 					m_data.push_back(value);
 					if (m_data.size() == bucketSize())
 					{
+						size_t middleIndex = bucketSize() / 2 - 1;
 						auto comp = [this, &distance](const Data & d1, const Data & d2) { return distance(m_centroid, d1) < distance(m_centroid, d2); };
-						std::sort(m_data.begin(), m_data.end(), comp);
-						m_limit = distance(m_centroid, m_data[bucketSize() / 2 - 1]);
+						std::sort(m_data.begin(), m_data.end(), comp); // I should use nth_element, O(n) in average instead of O(n log2 n).
+						//std::nth_element(m_data.begin(), m_data.begin() + middleIndex, m_data.end(), comp);
+						m_limit = distance(m_centroid, m_data[middleIndex]);
 						m_left = new Node(m_data.front());
 						m_right = new Node(m_data.back());
 						for (auto it = m_data.begin() + 1, end = m_data.end() - 1; it != end; ++it)
@@ -126,64 +129,115 @@ namespace MotionPlanning
 					}
 				}
 			}
-		
+
 			/// <summary>
 			/// Finds the nearest neighbor of value
 			/// </summary>
 			/// <param name="value">The value.</param>
-			/// <param name="distance">The distance function.</param>
+			/// <param name="distance">The distance function distance(Data, SearchData).</param>
 			/// <param name="nearestRadius">The nearest distance found so far.</param>
 			/// <returns></returns>
 			template <typename DistanceFunction>
-			Data nearestNeighbour(const SearchData & value, const DistanceFunction & distance, float nearestRadius=std::numeric_limits<float>::max()) const
+			void nearestNeighbour(const SearchData & value, const DistanceFunction & distance, Data & nearest, float & nearestDistance)
 			{
-				Data nearest = m_centroid;
-				if (distance(m_centroid, value) > m_radius + nearestRadius) { return nearest; }
-				nearestRadius = std::min(nearestRadius, distance(m_centroid, value));
-				if (m_left && m_right) // Internal node
+				float centroidDistance = distance(m_centroid, value);
+				if(centroidDistance<nearestDistance)
 				{
-					s_vpTreeDistanceCount += 5;
-					bool swap = false;
-					Node * first = m_left, *second = m_right;
-					float centroidDistance = distance(m_centroid, value);
-					if (centroidDistance > m_limit)
+					nearest = m_centroid;
+					nearestDistance = centroidDistance;
+				}
+				for (auto it = m_data.begin(), end = m_data.end(); it != end; ++it)
+				{
+					float localDistance = distance(*it, value);
+					if(localDistance < nearestDistance)
 					{
-						std::swap(first, second);
-						swap = true;
-					}
-					Data nearestFirst = first->nearestNeighbour(value, distance, nearestRadius);
-					if (distance(nearestFirst, value) < distance(nearest, value))
-					{
-						nearest = nearestFirst;
-						nearestRadius = distance(nearest, value);
-					}
-					float nearestDistance = distance(nearest, value);
-					if (!swap && centroidDistance + nearestDistance > m_limit ||
-						swap && centroidDistance - nearestDistance <= m_limit)
-					{
-						Data nearestSecond = second->nearestNeighbour(value, distance, nearestRadius);
-						if (distance(nearestSecond, value) < nearestDistance)
-						{
-							nearest = nearestSecond;
-							nearestRadius = distance(nearest, value);
-						}
+						nearest = (*it);
+						nearestDistance = localDistance;
 					}
 				}
-				else // leaf node
+				if(m_left && distance(m_centroid, value)-nearestDistance<=m_limit)
 				{
-					float optimalDistance = distance(nearest, value);
-					for (auto it = m_data.begin(), end = m_data.end(); it != end; ++it)
-					{
-						s_vpTreeDistanceCount += 2;
-						if (distance(*it, value) < optimalDistance)
-						{
-							nearest = *it;
-							optimalDistance = distance(*it, value);
-						}
-					}
+					m_left->nearestNeighbour(value, distance, nearest, nearestDistance);
 				}
-				return nearest;
+				if(m_right && distance(m_centroid, value)+nearestDistance>m_limit)
+				{
+					m_right->nearestNeighbour(value, distance, nearest, nearestDistance);
+				}
 			}
+			
+			/// <summary>
+			/// Selects all the elements in a ball centered in center with radius radius.
+			/// </summary>
+			/// <param name="center">The center of the ball.</param>
+			/// <param name="radius">The radius of the ball.</param>
+			/// <param name="distance">The distance function.</param>
+			/// <param name="result">The selected elements.</param>
+			template <typename DistanceFunction>
+			void select(const SearchData & center, double radius, const DistanceFunction & distance, std::vector<Data> & result)
+			{
+				const float distanceToCentroid = distance(m_centroid, center);
+				// If the distance to the centroid is greater than the sum of this node radius and the provided radius, nothing to do...
+				if (distanceToCentroid > radius + m_radius) { return; } 
+				if(distanceToCentroid<=radius) // If the centroid is in the selector, we add it to the results;
+				{
+					result.push_back(m_centroid);
+				}
+				for(auto it=m_data.begin(), end = m_data.end() ; it!=end; ++it)
+				{
+					if(distance(*it, center)<=radius)
+					{
+						result.push_back(*it);
+					}
+				}
+				if (m_left && distanceToCentroid - radius <= m_limit) { m_left->select(center, radius, distance, result); }
+				if (m_right && distanceToCentroid + radius > m_limit) { m_right->select(center, radius, distance, result); }
+			}
+
+			/// <summary>
+			/// Computes the k nearest neighbours of the provided value.
+			/// </summary>
+			/// <param name="center">The value for which the k nearest neighbours should be computed.</param>
+			/// <param name="distance">The distance function distance(Data, SearchData).</param>
+			/// <param name="result">The result.</param>
+			template <typename DistanceFunction>
+			void kNearestNeighbours(const SearchData & center, const DistanceFunction & distance, stdext::kmap<float, Data> & result)
+			{
+				const float distanceToCentroid = distance(m_centroid, center);
+				float radius = std::numeric_limits<float>::max();
+				if (result.has_max()) { radius = result.max(); }
+				// No need to explore if the center is too far from the centroid
+				if (distanceToCentroid - radius > m_radius) { return; }
+				// If the distance to the centroid is lesser that the maximum distance, we add the centroid
+				if (distanceToCentroid <= radius)
+				{
+					result.insert({ distanceToCentroid, m_centroid });
+					if (result.has_max()) { radius = result.max(); } // We update the radius if needed
+				}
+				// We add all the data in the kmap structure if needed
+				for (auto it = m_data.begin(), end = m_data.end(); it != end; ++it)
+				{
+					result.insert({distance(*it, center), *it});
+				}
+				if (result.has_max()) { radius = result.max(); } // We update the radius if needed
+				// We explore the left son if needed
+				if (m_left && distanceToCentroid - radius <= m_limit) 
+				{ 
+					m_left->kNearestNeighbours(center, distance, result); 
+					if (result.has_max()) { radius = result.max(); } // We update the radius if needed
+				}
+				// We explore the right son if needed
+				if (m_right && distanceToCentroid + radius > m_limit) 
+				{ 
+					m_right->kNearestNeighbours(center, distance, result); 
+					if (result.has_max()) { radius = result.max(); } // We update the radius if needed
+				}
+			}
+
+			/// <summary>
+			/// Gets the centroid.
+			/// </summary>
+			/// <returns></returns>
+			const Data & getCentroid() const { return m_centroid; }
 		};
 
 		/// <summary>
@@ -205,21 +259,8 @@ namespace MotionPlanning
 		void reorganize()
 		{
 			if (m_root == nullptr || m_nbData != m_previousNbData) { return; } // Nothing to do
-			std::cout << "Reorganizing tree..." << std::flush;
-			std::vector<Data> collected;
-			collected.reserve(m_nbData);
-			m_root->collectData(collected);
 			m_previousNbData *= 2;
-			delete m_root;
-			m_root = nullptr;
-			while (!collected.empty())
-			{
-				size_t index = rand() % collected.size();
-				std::swap(collected[index], collected.back());
-				add(collected.back());
-				collected.pop_back();
-			}
-			std::cout << "OK" << std::endl;
+			recompute();
 		}
 
 		/// <summary>
@@ -245,7 +286,30 @@ namespace MotionPlanning
 		template <typename Distance>
 		Data nearestNeighbour(const SearchData & value, const Distance & distance) const
 		{
-			return m_root->nearestNeighbour(value, distance);
+			//return m_root->nearestNeighbour(value, distance);
+			float nearestDistance = distance(m_root->getCentroid(), value);
+			Data nearest = m_root->getCentroid();
+			m_root->nearestNeighbour(value, distance, nearest, nearestDistance);
+			return nearest;
+		}
+
+		/// <summary>
+		/// Selects all nodes lying in the ball centered at value, of radius radius.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <param name="radius">The radius.</param>
+		/// <param name="distance">The distance function.</param>
+		/// <param name="result">The result.</param>
+		template <typename Distance>
+		void select(const SearchData & value, double radius, const Distance & distance, std::vector<Data> & result)
+		{
+			m_root->select(value, radius, distance, result);
+		}
+
+		template <typename Distance>
+		void kNearestNeighbour(const SearchData & center, const Distance & distance, stdext::kmap<float, Data> & result)
+		{
+			m_root->kNearestNeighbours(center, distance, result);
 		}
 
 		/// <summary>
@@ -258,6 +322,13 @@ namespace MotionPlanning
 		/// </summary>
 		std::function<Data(const SearchData &)> neighbourFunction;
 
+		/// <summary>
+		/// Function used to find all the elements in a ball.
+		/// </summary>
+		std::function<void(const SearchData &, double radius, std::vector<Data> &)> selectFunction;
+
+		std::function<void(const SearchData &, stdext::kmap<float, Data> &)> kNearestNeighbourFunction;
+		
 	public:
 		/// <summary>
 		/// Initializes a new instance of the <see cref="VPTree"/> class.
@@ -266,10 +337,12 @@ namespace MotionPlanning
 		/// <param name="distanceSearch">The distance function between a data element and the type used to request a nearest neighbor.</param>
 		template <typename Distance, typename DistanceSearch>
 		VPTree(Distance distanceData, DistanceSearch distanceSearch)
-			: m_root(nullptr), m_nbData(0), m_previousNbData(bucketSize()*2)
+			: m_root(nullptr), m_nbData(0), m_previousNbData(bucketSize() * 2)
 		{
 			addFunction = [this, distanceData](const Data & value) { add(value, distanceData); };
 			neighbourFunction = [this, distanceSearch](const SearchData & value) -> Data { return nearestNeighbour(value, distanceSearch); };
+			selectFunction = [this, distanceSearch](const SearchData & center, double radius, std::vector<Data> & result) { select(center, radius, distanceSearch, result); };
+			kNearestNeighbourFunction = [this, distanceSearch](const SearchData & center, stdext::kmap<float, Data> & result) { kNearestNeighbour(center, distanceSearch, result); };
 		}
 
 		/// <summary>
@@ -285,6 +358,20 @@ namespace MotionPlanning
 		/// <returns></returns>
 		VPTree & operator= (const VPTree &) = delete;
 
+		/// <summary>
+		/// Clears this tree.
+		/// </summary>
+		void clear()
+		{
+			if(m_root!=nullptr)
+			{
+				delete m_root;
+				m_root = nullptr;
+				m_nbData = 0;
+				m_previousNbData = bucketSize() * 2;
+			}
+		}
+		
 		/// <summary>
 		/// Finalizes an instance of the <see cref="VPTree"/> class.
 		/// </summary>
@@ -303,6 +390,25 @@ namespace MotionPlanning
 		}
 
 		/// <summary>
+		/// Recomputes this tree. Useful if the elements are moving objects.
+		/// </summary>
+		void recompute()
+		{
+			std::vector<Data> collected;
+			collected.reserve(m_nbData);
+			m_root->collectData(collected);
+			delete m_root;
+			m_root = nullptr;
+			while (!collected.empty())
+			{
+				size_t index = rand() % collected.size();
+				std::swap(collected[index], collected.back());
+				add(collected.back());
+				collected.pop_back();
+			}
+		}
+
+		/// <summary>
 		/// Computes the nearest neighbor.
 		/// </summary>
 		/// <param name="value">The value.</param>
@@ -311,5 +417,44 @@ namespace MotionPlanning
 		{
 			return neighbourFunction(value);
 		}
+
+		/// <summary>
+		/// Selects the elements in the ball centered in center with radius radius.
+		/// </summary>
+		/// <param name="center">The center of the ball.</param>
+		/// <param name="radius">The radius of the ball.</param>
+		/// <returns></returns>
+		std::vector<Data> select(const SearchData & center, double radius) const
+		{
+			std::vector<Data> result;
+			selectFunction(center, radius, result);
+			return result;
+		}
+
+		/// <summary>
+		/// Returns the k nearest neighbours of the provided value.
+		/// </summary>
+		/// <param name="center">The value for which the k nearest neighbours should be computed.</param>
+		/// <param name="k">The k.</param>
+		/// <returns></returns>
+		std::vector<Data> kNearestNeighbour(const SearchData & center, size_t k)
+		{
+			if (m_root == nullptr) { return std::vector<Data>(); }
+			stdext::kmap<float, Data> result(k);
+			kNearestNeighbourFunction(center, result);
+			std::vector<Data> toReturn;
+			toReturn.reserve(k);
+			for (auto it = result.begin(), end = result.end(); it != end; ++it)
+			{
+				toReturn.push_back(it->second);
+			}
+			return toReturn;
+		}
+
+		/// <summary>
+		/// Returns the size of the tree
+		/// </summary>
+		/// <returns></returns>
+		size_t size() const { return m_nbData; }
 	};
 }

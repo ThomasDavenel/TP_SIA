@@ -2,24 +2,36 @@
 
 namespace MotionPlanning
 {
-	SixDofPlannerBase::Configuration SixDofPlannerBase::randomConfiguration()
+	SixDofPlannerBase::SixDofPlannerBase(MotionPlanning::CollisionManager* collisionManager, MotionPlanning::CollisionManager::DynamicCollisionObject object, const std::initializer_list<std::pair<float, float>>& intervals):
+		m_intervals(intervals), m_collisionManager(collisionManager), m_object(object)
+	{
+		assert(m_intervals.size() == 6);
+	}
+
+	SixDofPlannerBase::SixDofPlannerBase(MotionPlanning::CollisionManager* collisionManager, MotionPlanning::CollisionManager::DynamicCollisionObject object, const std::vector<std::pair<float, float>>& intervals)
+	: m_intervals(intervals), m_collisionManager(collisionManager), m_object(object)
+	{
+		assert(m_intervals.size() == 6);
+	}
+
+	SixDofPlannerBase::Configuration SixDofPlannerBase::randomConfiguration() const
 	{
 		float dofs[6];
 		for (size_t cpt = 0; cpt<6; ++cpt)
 		{
-			dofs[cpt] = m_uniformRandom(m_intervals[cpt].first, m_intervals[cpt].second);
+			dofs[cpt] = static_cast<float>(m_uniformRandom(m_intervals[cpt].first, m_intervals[cpt].second));
 		}
 		return Configuration{ Math::makeVector(dofs[0], dofs[1], dofs[2]), Math::makeVector(dofs[3], dofs[4], dofs[5]) };
 	}
 
-	float SixDofPlannerBase::distanceToObstacles(const Configuration & configuration)
+	float SixDofPlannerBase::distanceToObstacles(const Configuration & configuration) const
 	{
 		m_object.setTranslation(configuration.m_translation);
 		m_object.setOrientation(configuration.m_orientation);
 		return m_collisionManager->computeDistance();
 	}
 
-	bool SixDofPlannerBase::doCollide(const Configuration & configuration)
+	bool SixDofPlannerBase::doCollide(const Configuration & configuration) const
 	{
 		m_object.setTranslation(configuration.m_translation);
 		//m_object.setOrientation(toQuaternion(configuration.m_eulerAngles));
@@ -28,62 +40,49 @@ namespace MotionPlanning
 		return m_collisionManager->doCollide();
 	}
 
-	float SixDofPlannerBase::configurationDistance(const Configuration & c1, const Configuration & c2) const
+	float SixDofPlannerBase::configurationDistance(const Configuration & c1, const Configuration & c2) 
 	{
-		Math::Vector3f point = Math::makeVector(m_maxDistance, 0.f, 0.f);
-		Math::Vector3f startPt = c1.m_orientation.rotate(point); // +c1.m_translation;
-		Math::Vector3f endPt = c2.m_orientation.rotate(point); // +c2.m_translation;
-		return std::max((startPt - endPt).norm(), (c1.m_translation - c2.m_translation).norm());
-		//return (startPt - endPt).norm() + (c1.m_translation - c2.m_translation).norm();
+		float wR = 1;
+		float wT = 1;
+		return (c1.m_translation-c2.m_translation).norm()*wT + wR*acos(c1.m_orientation.dot(c2.m_orientation)) /(0.5*Math::pi); // For  compilation purpose
 	}
 
-	bool SixDofPlannerBase::doCollideRecursive(const Math::Vector3f & startPosition, const Math::Quaternion<float>& startQ, const Math::Vector3f & endPosition, const Math::Quaternion<float>& endQ, float dq)
+	SixDofPlannerBase::Configuration SixDofPlannerBase::limitDistance(const Configuration& source, const Configuration& target, float maxDistance, size_t iterationLimit)
 	{
-		//float distance = orientationDistance(startQ, endQ) + (endPosition - startPosition).norm();
-		float distance = configurationDistance(Configuration(startPosition, startQ), Configuration(endPosition, endQ));
-		Math::Vector3f middlePosition = (startPosition + endPosition) / 2.0f;
-		Math::Quaternion<float> middleOrientation = Math::Quaternion<float>::slerp(startQ, endQ, 0.5f);
-
-		if (distance < dq)
+		std::pair<float, float> interval = {0.0f, 1.0f};
+		if (configurationDistance(source, target) <= maxDistance) { return target; }
+		for (size_t cpt = 0; cpt < iterationLimit; ++cpt)
 		{
-			m_object.setTranslation(middlePosition);
-			m_object.setOrientation(middleOrientation);
-			return m_collisionManager->doCollide();
-		}
-
-		return doCollideRecursive(startPosition, startQ, middlePosition, middleOrientation, dq) ||
-			doCollideRecursive(middlePosition, middleOrientation, endPosition, endQ, dq);
-	}
-
-	bool SixDofPlannerBase::doCollide(const Configuration & start, const Configuration & end, float dq)
-	{
-		return doCollideRecursive(start.m_translation, start.m_orientation, end.m_translation, end.m_orientation, dq);
-	}
-
-	void SixDofPlannerBase::optimize(::std::vector<Configuration>& toOptimize, float dq)
-	{
-		// Step 1 : we try to remove 
-		for (size_t cpt = 0; (cpt + 2) < toOptimize.size(); ++cpt)
-		{
-			if (!doCollide(toOptimize[cpt], toOptimize[cpt + 2], dq))
+			float middle = (interval.first + interval.second) * 0.5f;
+			if (configurationDistance(source, source.interpolate(target, middle)) < maxDistance)
 			{
-				toOptimize.erase(toOptimize.begin() + cpt + 1);
-				cpt--;
+				interval.first = middle;
+			}
+			else
+			{
+				interval.second = middle;
 			}
 		}
-		// Step 2 : we randomly move the points along the trajectory to try to optimize the path
-		for (size_t attempt = 0; attempt < 1000; ++attempt)
-		{
-			for (size_t cpt = 1; cpt < toOptimize.size() - 1; ++cpt)
-			{
-				float value = m_uniformRandom(0.0f, 1.0f);
-				Configuration intermediate = toOptimize[cpt - 1].interpolate(toOptimize[cpt], value);
-				bool collision = doCollide(intermediate, toOptimize[cpt + 1], dq);
-				if (!collision)
-				{
-					toOptimize[cpt] = intermediate;
-				}
-			}
+		Configuration result = source.interpolate(target, interval.first);
+		return result;
+	}
+
+	bool SixDofPlannerBase::doCollide(const Configuration & start, const Configuration & end, float dq) const
+	{
+		float d = configurationDistance(start, end);
+		if (d < dq) {
+			return doCollide(start) && doCollide(end);
 		}
+		else {
+			Math::Quaternion<float> mid_orientation = Math::Quaternion<float>::slerp(start.m_orientation, end.m_orientation, 0.5);
+			Math::Vector3f mid_translation = (start.m_translation + end.m_translation) / 2;
+			Configuration mid(mid_translation, mid_orientation);
+			return doCollide(start, mid, dq) && doCollide(mid, end, dq);
+		}
+	}
+
+	void SixDofPlannerBase::optimize(::std::vector<Configuration>& toOptimize, float dq) const
+	{
+		// Does nothing for now...
 	}
 }
