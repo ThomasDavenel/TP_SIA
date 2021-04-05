@@ -101,6 +101,8 @@ namespace Application
 
 		virtual void render(double dt)
 		{
+			//En mode debug les ailes se bloquent contrairement en mode release !
+			//m_interpolationV2 ou m_interpolation en fonction de la version de l'interpolation que l'on veut avoir
 			tmp += dt;
 			//std::cout << tmp << "  ->  " << std::endl;
 			Math::Vector3f pos = m_interpolationV2.SplineHermite(tmp);

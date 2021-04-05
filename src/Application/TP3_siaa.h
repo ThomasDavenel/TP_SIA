@@ -94,7 +94,7 @@ namespace Application
 			Math::Vector3f vitesse = current.m_speed;
 			if (current.m_position[2] <= -1.49) {
 				position[2] = previous.m_position[2];
-				vitesse = 0;
+				vitesse[2] = 0.f;
 			}
 			::std::pair<Math::Vector3f, Math::Vector3f> res;
 			res.first = position;

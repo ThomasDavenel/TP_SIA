@@ -177,8 +177,9 @@ namespace Application
 			cible = new SceneGraph::Translate(Math::makeVector(x_rng, y_rng, z_rng));
 			cible->addSon(new SceneGraph::Sphere(mat_sphere, rayon_sphere));
 			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
+			tmp = 0;
 			cible_Intermediaire = new SceneGraph::Translate(m_interpolation.SplineHermite(tmp));
-			pt_Depart->setTranslation(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0));
+			pt_Depart = new SceneGraph::Translate(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0));
 			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0,0,0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
 			mat_sphere.setDiffuse(HelperGl::Color(1.f, 0.4f, 0.f));
 			mat_sphere.setSpecular(HelperGl::Color(1.f, 0.4f, 0.f));
@@ -207,7 +208,6 @@ namespace Application
 			z_rng = ((float)(rand() % 100) / 100)*(nb_os / 2);
 			cible->setTranslation(Math::makeVector(x_rng, y_rng, z_rng));
 			m_interpolation = Interpol_Traj(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0), Math::makeVector(0, 0, 0), cible->getTranslation(), Math::makeVector(0, 0, 0));
-			tmp = 0;
 			cible_Intermediaire->setTranslation(m_interpolation.SplineHermite(tmp));
 			pt_Depart->setTranslation(extremiteNoeud->getGlobalTransformation()*Math::makeVector(0, 0, 0));
 		}
