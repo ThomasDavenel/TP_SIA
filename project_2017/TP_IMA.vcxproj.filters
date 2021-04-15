@@ -76,6 +76,9 @@
     <Filter Include="src\Sia">
       <UniqueIdentifier>{597dc607-b498-4b4c-83c6-df3b075ad242}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\stdext">
+      <UniqueIdentifier>{fdfccb9c-3178-495b-8115-2bfd1d3a8b42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\HelperGl\src\Text.cpp">
@@ -200,6 +203,12 @@
     </ClCompile>
     <ClCompile Include="..\src\HelperGl\src\ShaderProgram.cpp">
       <Filter>src\HelperGL [OpenGL 1.0-2.0]\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MotionPlanning\src\SixDofConfigurationGraph.cpp">
+      <Filter>src\MotionPlanning\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MotionPlanning\RRT.h">
+      <Filter>src\MotionPlanning</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -523,6 +532,30 @@
     </ClInclude>
     <ClInclude Include="..\src\Application\TP3_siaa.h">
       <Filter>src\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Application\SIAA_TP4_MotionPlanning.h">
+      <Filter>src\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Math\Polynomial2.h">
+      <Filter>src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MotionPlanning\CollisionManager (1).h">
+      <Filter>src\MotionPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MotionPlanning\SixDofConfigurationGraph.h">
+      <Filter>src\MotionPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MotionPlanning\SixDofConfigurationTree.h">
+      <Filter>src\MotionPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stdext\disjoint_set.h">
+      <Filter>src\stdext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stdext\kmap.h">
+      <Filter>src\stdext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MotionPlanning\PRM.h">
+      <Filter>src\MotionPlanning</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

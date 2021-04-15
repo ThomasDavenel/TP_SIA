@@ -6,6 +6,7 @@
 #include <Application/TP1_siaa.h>
 #include <Application/TP2_siaa.h>
 #include <Application/TP3_siaa.h>
+#include <Application/SIAA_TP4_MotionPlanning.h>
 
 int main(int argc, char ** argv)
 {
@@ -18,10 +19,13 @@ int main(int argc, char ** argv)
 	Application::ApplicationSelection::registerFactory<Application::GL3_TP3>("OpenGL 3 - TP 3");
 	*/
 	/*SIA*/
+	
 	Application::ApplicationSelection::registerFactory<Application::TP1_siaa>("SIA - TP 1");
 	Application::ApplicationSelection::registerFactory<Application::TP2_siaa>("SIA - TP 2");
 	Application::ApplicationSelection::registerFactory<Application::TP3_siaa>("SIA - TP 3");
-
+	
+	/*SIA_partie2*/
+	Application::ApplicationSelection::registerFactory<Application::SIAA_TP4_MotionPlanning>("SIA - TP 4");
 	// Initializes GLUT and GLEW
 	Application::Base::initializeGLUT(argc, argv) ;
 	// Selection of the application and run

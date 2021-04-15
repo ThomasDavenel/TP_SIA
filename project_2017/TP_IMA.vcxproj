@@ -228,7 +228,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\MotionPlanning\RRT.h" />
     <ClCompile Include="..\src\MotionPlanning\src\CollisionManager.cpp" />
+    <ClCompile Include="..\src\MotionPlanning\src\SixDofConfigurationGraph.cpp" />
     <ClCompile Include="..\src\MotionPlanning\src\SixDofPlannerBase.cpp" />
     <ClCompile Include="..\src\SceneGraph\src\CoordinateSystem.cpp" />
     <ClCompile Include="..\src\SceneGraph\src\Cylinder%3bcpp.cpp" />
@@ -265,6 +267,7 @@
     <ClInclude Include="..\src\Application\GL3_TP_skeleton.h" />
     <ClInclude Include="..\src\Application\KeyboardStatus.h" />
     <ClInclude Include="..\src\Application\Menu.h" />
+    <ClInclude Include="..\src\Application\SIAA_TP4_MotionPlanning.h" />
     <ClInclude Include="..\src\Application\TP1_siaa.h" />
     <ClInclude Include="..\src\Application\TP2_siaa.h" />
     <ClInclude Include="..\src\Application\TP3_siaa.h" />
@@ -320,14 +323,19 @@
     <ClInclude Include="..\src\Math\Interval.h" />
     <ClInclude Include="..\src\Math\Matrix4x4.h" />
     <ClInclude Include="..\src\Math\Matrix4x4f.h" />
+    <ClInclude Include="..\src\Math\Polynomial2.h" />
     <ClInclude Include="..\src\Math\Quaternion.h" />
     <ClInclude Include="..\src\Math\Sampler.h" />
     <ClInclude Include="..\src\Math\SphericalCoordinates.h" />
     <ClInclude Include="..\src\Math\UniformRandom.h" />
     <ClInclude Include="..\src\Math\Vector.h" />
     <ClInclude Include="..\src\Math\Vectorf.h" />
+    <ClInclude Include="..\src\MotionPlanning\CollisionManager (1).h" />
     <ClInclude Include="..\src\MotionPlanning\CollisionManager.h" />
     <ClInclude Include="..\src\MotionPlanning\converter.h" />
+    <ClInclude Include="..\src\MotionPlanning\PRM.h" />
+    <ClInclude Include="..\src\MotionPlanning\SixDofConfigurationGraph.h" />
+    <ClInclude Include="..\src\MotionPlanning\SixDofConfigurationTree.h" />
     <ClInclude Include="..\src\MotionPlanning\VPTree.h" />
     <ClInclude Include="..\src\MotionPlanning\SixDofPlannerBase.h" />
     <ClInclude Include="..\src\MotionPlanning\SixDofPlannerBiRRT.h" />
@@ -353,6 +361,8 @@
     <ClInclude Include="..\src\Sia\Insecte.h" />
     <ClInclude Include="..\src\Sia\Interpol_Traj.h" />
     <ClInclude Include="..\src\Sia\Interpol_Traj_v2.h" />
+    <ClInclude Include="..\src\stdext\disjoint_set.h" />
+    <ClInclude Include="..\src\stdext\kmap.h" />
     <ClInclude Include="..\src\System\Path.h" />
     <ClInclude Include="..\src\System\SearchPaths.h" />
     <ClInclude Include="..\src\Utils\History.h" />

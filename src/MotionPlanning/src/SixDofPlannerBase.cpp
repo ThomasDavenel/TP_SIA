@@ -71,13 +71,20 @@ namespace MotionPlanning
 	{
 		float d = configurationDistance(start, end);
 		if (d < dq) {
-			return doCollide(start) && doCollide(end);
+			return false;
 		}
 		else {
+			/*
 			Math::Quaternion<float> mid_orientation = Math::Quaternion<float>::slerp(start.m_orientation, end.m_orientation, 0.5);
 			Math::Vector3f mid_translation = (start.m_translation + end.m_translation) / 2;
-			Configuration mid(mid_translation, mid_orientation);
-			return doCollide(start, mid, dq) && doCollide(mid, end, dq);
+			*/
+			Configuration mid= start.interpolate(end,0.5);
+			if (doCollide(mid)) {
+				return true;
+			}
+			else {
+				return doCollide(start, mid, dq) || doCollide(mid, end, dq);
+			}
 		}
 	}
 

@@ -17,6 +17,7 @@
 #include <SceneGraph/Rotate.h>
 #include <SceneGraph/MeshVBO_v2.h>
 #include <MotionPlanning/SixDofPlannerBase.h>
+#include <MotionPlanning/RRT.h>
 
 //#include <MotionPlanning/SixDofPlannerRRTConnect.h>
 //#include <MotionPlanning/RandomForest.h>
@@ -134,9 +135,10 @@ namespace Application
 		{
 			std::filesystem::path modelPath = Config::dataPath() / "MotionPlanning";
 			// You can select the workspace (going from the simplest to the most complex one)
-			HelperGl::Loader3ds loader(modelPath / "world.3ds", modelPath);
+			//HelperGl::Loader3ds loader(modelPath / "world.3ds", modelPath);
 			//HelperGl::Loader3ds loader((modelPath / "world2.3ds").string(), modelPath.string());
 			//HelperGl::Loader3ds loader((modelPath / "world3.3ds").string(), modelPath.string());
+			HelperGl::Loader3ds loader((modelPath / "world_simple.3ds").string(), modelPath.string());
 
 			const std::vector<HelperGl::Mesh *> meshes = loader.getMeshes();
 			// Creates the scene graph
@@ -188,13 +190,13 @@ namespace Application
 			switch (index)
 			{
 			case 0: // RRT 
-				//{
-				//	using RRT = MotionPlanning::SixDofPlannerRRTConnect;
-				//	planner = new RRT(&m_collisionManager, m_mobileCollisionObject);
-				//	std::cout << "Enter radius for RRT: ";
-				//	std::cin >> radius;
-				//	break;
-				//}
+				{
+					using RRT = MotionPlanning::RRT;
+					planner = new RRT(&m_collisionManager, m_mobileCollisionObject);
+					std::cout << "Enter radius for RRT: ";
+					std::cin >> radius;
+					break;
+				}
 			case 1: // PRM
 				//{
 				//	MotionPlanning::PRM * prm = new MotionPlanning::PRM(&m_collisionManager, m_mobileCollisionObject);
