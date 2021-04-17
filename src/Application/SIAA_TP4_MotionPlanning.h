@@ -18,6 +18,7 @@
 #include <SceneGraph/MeshVBO_v2.h>
 #include <MotionPlanning/SixDofPlannerBase.h>
 #include <MotionPlanning/RRT.h>
+#include <MotionPlanning/PRM.h>
 
 //#include <MotionPlanning/SixDofPlannerRRTConnect.h>
 //#include <MotionPlanning/RandomForest.h>
@@ -139,6 +140,7 @@ namespace Application
 			//HelperGl::Loader3ds loader((modelPath / "world2.3ds").string(), modelPath.string());
 			//HelperGl::Loader3ds loader((modelPath / "world3.3ds").string(), modelPath.string());
 			HelperGl::Loader3ds loader((modelPath / "world_simple.3ds").string(), modelPath.string());
+			//HelperGl::Loader3ds loader("", "");
 
 			const std::vector<HelperGl::Mesh *> meshes = loader.getMeshes();
 			// Creates the scene graph
@@ -198,18 +200,18 @@ namespace Application
 					break;
 				}
 			case 1: // PRM
-				//{
-				//	MotionPlanning::PRM * prm = new MotionPlanning::PRM(&m_collisionManager, m_mobileCollisionObject);
-				//	size_t neighbourhood, nbNodes;
-				//	std::cout << "Number of neighbours for the creation of the PRM: ";
-				//	std::cin >> neighbourhood;
-				//	std::cout << "Number of nodes for the creation of the PRM: ";
-				//	std::cin >> nbNodes;
-				//	std::cout << "Computing PRM..." << std::flush;
-				//	prm->grow(nbNodes, neighbourhood, 0.02, std::numeric_limits<size_t>::max());
-				//	std::cout << "OK" << std::endl;
-				//	planner = prm;
-				//}
+				{
+					MotionPlanning::PRM * prm = new MotionPlanning::PRM(&m_collisionManager, m_mobileCollisionObject);
+					size_t neighbourhood, nbNodes;
+					std::cout << "Number of neighbours for the creation of the PRM: ";
+					std::cin >> neighbourhood;
+					std::cout << "Number of nodes for the creation of the PRM: ";
+					std::cin >> nbNodes;
+					std::cout << "Computing PRM..." << std::flush;
+					prm->grow(nbNodes, neighbourhood, 0.02, std::numeric_limits<size_t>::max());
+					std::cout << "OK" << std::endl;
+					planner = prm;
+				}
 			break;
 			}
 

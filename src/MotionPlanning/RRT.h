@@ -33,7 +33,7 @@ namespace MotionPlanning
 			arbre.createNode(start);
 			bool linked = false;
 			int cpt = 0;
-			int maxIter = 100000;
+			int maxIter = 1000000;
 			while (!linked && cpt<maxIter) {
 				//On créer Qrand
 				Configuration rnd_Config = randomConfiguration();
@@ -94,14 +94,16 @@ namespace MotionPlanning
 			if (changement) optimise(result, dq);
 		}
 		void optimiseBis(std::vector<Configuration> & result, float dq,int nbIter) {
-			for (int i = 0; i < nbIter;i++) {
-				int rnd1 = (int)((rand() % (result.size() - 2))) + 1;
-				//std::cout << rnd1 << std::endl;
-				float rnd2 = (float)((rand() % 100 + 1)) / 100;
-				Configuration newC = result[rnd1 - 1].interpolate(result[rnd1], rnd2);
-				if (!doCollide(newC, result[rnd1 + 1], dq)) {
-					*(result.begin()+rnd1) = newC;
-					std::cout << "opti2" << std::endl;
+			for (int i = 0; i < nbIter;i++) {		
+				if (result.size() > 2) {
+					int rnd1 =(int)((rand() % (result.size() - 2))) + 1;
+					//std::cout << rnd1 << std::endl;
+					float rnd2 = (float)((rand() % 100 + 1)) / 100;
+					Configuration newC = result[rnd1 - 1].interpolate(result[rnd1], rnd2);
+					if (!doCollide(newC, result[rnd1 + 1], dq)) {
+						*(result.begin()+rnd1) = newC;
+						std::cout << "opti2" << std::endl;
+					}
 				}
 			}
 		}
