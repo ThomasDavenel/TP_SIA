@@ -119,6 +119,7 @@
       <AdditionalDependencies>fcl.lib;assimp-vc140-mt.lib;glew32sd.lib;soil.lib;lib3ds.lib;tbb_debug.lib;ccd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(AnimRenduDep)/lib/$(Configuration);$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <StackReserveSize>10000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
       <Command>$(AnimRenduDep)/copyDllDebug.bat $(OutDir)</Command>
@@ -203,6 +204,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\AI\Tasks\src\Compile_AI_tasks.cpp" />
     <ClCompile Include="..\src\Animation\src\InverseKinematics.cpp" />
     <ClCompile Include="..\src\Animation\src\KinematicChain.cpp" />
     <ClCompile Include="..\src\Animation\src\Particle.cpp" />
@@ -213,6 +215,7 @@
     <ClCompile Include="..\src\Application\src\ApplicationSelection.cpp" />
     <ClCompile Include="..\src\Application\src\Base.cpp" />
     <ClCompile Include="..\src\Application\src\Menu.cpp" />
+    <ClCompile Include="..\src\Crowds\src\GraphicsFactory.cpp" />
     <ClCompile Include="..\src\HelperGl\src\Camera.cpp" />
     <ClCompile Include="..\src\HelperGl\src\Draw.cpp" />
     <ClCompile Include="..\src\HelperGl\src\LaoderAssimp.cpp" />
@@ -251,6 +254,12 @@
     <ClCompile Include="..\src\System\src\Path.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\AI\Blackboard.h" />
+    <ClInclude Include="..\src\AI\Tasks\internal\Operators_imp.h" />
+    <ClInclude Include="..\src\AI\Tasks\internal\TimeOperators_imp.h" />
+    <ClInclude Include="..\src\AI\Tasks\Operators.h" />
+    <ClInclude Include="..\src\AI\Tasks\Task.h" />
+    <ClInclude Include="..\src\AI\Tasks\TimeOperators.h" />
     <ClInclude Include="..\src\Animation\InverseKinematics.h" />
     <ClInclude Include="..\src\Animation\KinematicChain.h" />
     <ClInclude Include="..\src\Animation\Particle.h" />
@@ -268,10 +277,20 @@
     <ClInclude Include="..\src\Application\KeyboardStatus.h" />
     <ClInclude Include="..\src\Application\Menu.h" />
     <ClInclude Include="..\src\Application\SIAA_TP4_MotionPlanning.h" />
+    <ClInclude Include="..\src\Application\SIAA_TP5_behavior.h" />
     <ClInclude Include="..\src\Application\TP1_siaa.h" />
     <ClInclude Include="..\src\Application\TP2_siaa.h" />
     <ClInclude Include="..\src\Application\TP3_siaa.h" />
     <ClInclude Include="..\src\Config.h" />
+    <ClInclude Include="..\src\Crowds\Agent.h" />
+    <ClInclude Include="..\src\Crowds\Boid.h" />
+    <ClInclude Include="..\src\Crowds\GraphicsFactory.h" />
+    <ClInclude Include="..\src\Crowds\LocalizedAgent2d.h" />
+    <ClInclude Include="..\src\Crowds\Messages.h" />
+    <ClInclude Include="..\src\Crowds\Predator.h" />
+    <ClInclude Include="..\src\Crowds\Prey.h" />
+    <ClInclude Include="..\src\Crowds\Simulator.h" />
+    <ClInclude Include="..\src\Crowds\Water.h" />
     <ClInclude Include="..\src\gl3\AttribPointerProxy.h" />
     <ClInclude Include="..\src\gl3\Camera.h" />
     <ClInclude Include="..\src\gl3\ConventionalShaderProgram.h" />
