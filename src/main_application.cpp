@@ -7,6 +7,7 @@
 #include <Application/TP2_siaa.h>
 #include <Application/TP3_siaa.h>
 #include <Application/SIAA_TP4_MotionPlanning.h>
+#include <Application/SIAA_TP5_behavior.h>
 
 int main(int argc, char ** argv)
 {
@@ -26,6 +27,7 @@ int main(int argc, char ** argv)
 	
 	/*SIA_partie2*/
 	Application::ApplicationSelection::registerFactory<Application::SIAA_TP4_MotionPlanning>("SIA - TP 4");
+	Application::ApplicationSelection::registerFactory<Application::SIAA_TP5_behavior>("SIA - TP 5");
 	// Initializes GLUT and GLEW
 	Application::Base::initializeGLUT(argc, argv) ;
 	// Selection of the application and run

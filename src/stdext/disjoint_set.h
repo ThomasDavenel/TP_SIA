@@ -87,7 +87,7 @@ namespace stdext
 			tree_node * node = new tree_node(value);
 			m_map.insert({ value, node });
 			m_nbSets++;
-			true;
+			return true;
 		}
 
 		/// <summary>

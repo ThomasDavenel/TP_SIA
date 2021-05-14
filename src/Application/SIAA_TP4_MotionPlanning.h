@@ -137,9 +137,9 @@ namespace Application
 			std::filesystem::path modelPath = Config::dataPath() / "MotionPlanning";
 			// You can select the workspace (going from the simplest to the most complex one)
 			//HelperGl::Loader3ds loader(modelPath / "world.3ds", modelPath);
-			//HelperGl::Loader3ds loader((modelPath / "world2.3ds").string(), modelPath.string());
+			HelperGl::Loader3ds loader((modelPath / "world2.3ds").string(), modelPath.string());
 			//HelperGl::Loader3ds loader((modelPath / "world3.3ds").string(), modelPath.string());
-			HelperGl::Loader3ds loader((modelPath / "world_simple.3ds").string(), modelPath.string());
+			//HelperGl::Loader3ds loader((modelPath / "world_simple.3ds").string(), modelPath.string());
 			//HelperGl::Loader3ds loader("", "");
 
 			const std::vector<HelperGl::Mesh *> meshes = loader.getMeshes();

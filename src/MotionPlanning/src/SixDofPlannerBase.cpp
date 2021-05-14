@@ -1,4 +1,5 @@
 #include <MotionPlanning/SixDofPlannerBase.h>
+#include <algorithm>
 
 namespace MotionPlanning
 {
@@ -44,7 +45,14 @@ namespace MotionPlanning
 	{
 		float wR = 1;
 		float wT = 1;
-		return (c1.m_translation-c2.m_translation).norm()*wT + wR*acos(c1.m_orientation.dot(c2.m_orientation)) /(0.5*Math::pi); // For  compilation purpose
+		float dotProduct = std::clamp(fabs(c1.m_orientation.dot(c2.m_orientation)), 0.0f, 1.0f);
+		float result = (c1.m_translation-c2.m_translation).norm()*wT + wR*acos(dotProduct) /(0.5*Math::pi); // For  compilation purpose
+		assert(std::isfinite(result));
+		//if (c1 == c2)
+		//{
+		//	assert(false);
+		//}
+		return result;
 	}
 
 	SixDofPlannerBase::Configuration SixDofPlannerBase::limitDistance(const Configuration& source, const Configuration& target, float maxDistance, size_t iterationLimit)

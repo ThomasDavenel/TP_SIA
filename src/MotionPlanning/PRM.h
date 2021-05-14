@@ -56,7 +56,7 @@ namespace MotionPlanning
 			}
 		}
 		virtual bool 	plan(const Configuration &start, const Configuration &target, float radius, float dq, std::vector< Configuration > &result) override {
-			size_t k = 20;
+			size_t k = 5;
 			//On cree le graphe
 			//grow(50000, k, dq, 500000);
 			//On relie le start et le target au graphe
@@ -119,7 +119,9 @@ namespace MotionPlanning
 				}
 				else {
 					std::cout << "le start et le target ne font pas partie de la meme composante connexe --> on refais grossir le graphe" << std::endl;
-					grow(10, k, dq);
+					std::cout << "k =" << k << std::endl;
+					std::cout << "nb noeud = " << 1000 << std::endl;
+					grow(1000, k, dq);
 				}
 			}
 		}

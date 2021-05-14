@@ -78,6 +78,10 @@ namespace MotionPlanning
 			void collectData(std::vector<Data> & result)
 			{
 				result.push_back(m_centroid);
+				for (auto it = m_data.begin(), end = m_data.end(); it != end; ++it)
+				{
+					result.push_back(*it);
+				}
 				if (m_left) { m_left->collectData(result); }
 				if (m_right) { m_right->collectData(result);  }
 			}
@@ -190,7 +194,26 @@ namespace MotionPlanning
 					}
 				}
 				if (m_left && distanceToCentroid - radius <= m_limit) { m_left->select(center, radius, distance, result); }
+				else if (m_left) { m_left->debugDistance(center, radius, distance); }
 				if (m_right && distanceToCentroid + radius > m_limit) { m_right->select(center, radius, distance, result); }
+				else if (m_right) { m_right->debugDistance(center, radius, distance); }
+			}
+
+			template <typename DistanceFunction>
+			void debugDistance(const SearchData & center, double radius, const DistanceFunction & distance)
+			{
+				//const float distanceToCentroid = distance(m_centroid, center);
+				//assert(distanceToCentroid > radius);
+				//for (auto it = m_data.begin(), end = m_data.end(); it != end; ++it)
+				//{
+				//	float distanceElement = distance(*it, center);
+				//	if (distanceElement <= radius)
+				//	{
+				//		assert(false);
+				//	}
+				//}
+				//if (m_left) { m_left->debugDistance(center, radius, distance); }
+				//if (m_right) { m_right->debugDistance(center, radius, distance); }
 			}
 
 			/// <summary>
@@ -286,6 +309,7 @@ namespace MotionPlanning
 		template <typename Distance>
 		Data nearestNeighbour(const SearchData & value, const Distance & distance) const
 		{
+			assert(m_root != nullptr);
 			//return m_root->nearestNeighbour(value, distance);
 			float nearestDistance = distance(m_root->getCentroid(), value);
 			Data nearest = m_root->getCentroid();
@@ -303,12 +327,20 @@ namespace MotionPlanning
 		template <typename Distance>
 		void select(const SearchData & value, double radius, const Distance & distance, std::vector<Data> & result)
 		{
+			if (m_root == nullptr) { return; } // Empty tree.
 			m_root->select(value, radius, distance, result);
 		}
 
+		/// <summary>
+		/// Selects the k nearest neighbors.
+		/// </summary>
+		/// <param name="center">The center.</param>
+		/// <param name="distance">The distance.</param>
+		/// <param name="result">The result.</param>
 		template <typename Distance>
 		void kNearestNeighbour(const SearchData & center, const Distance & distance, stdext::kmap<float, Data> & result)
 		{
+			if (m_root == nullptr) { return; }
 			m_root->kNearestNeighbours(center, distance, result);
 		}
 
@@ -399,6 +431,7 @@ namespace MotionPlanning
 			m_root->collectData(collected);
 			delete m_root;
 			m_root = nullptr;
+			m_nbData = 0;
 			while (!collected.empty())
 			{
 				size_t index = rand() % collected.size();
